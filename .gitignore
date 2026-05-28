@@ -1,0 +1,102 @@
+# ============================================================
+#  OpenFOAM — Application Development .gitignore
+# ============================================================
+
+
+# ------------------------------------------------------------
+#  Build Artifacts  (Make/ subdirs that wmake generates)
+#  Keep: Make/files, Make/options
+# ------------------------------------------------------------
+Make/linux64*/
+Make/linux32*/
+Make/darwin*/
+Make/windows*/
+
+
+# ------------------------------------------------------------
+#  Compiled Binaries
+#  (wmake puts them in $FOAM_USER_APPBIN / $FOAM_USER_LIBBIN)
+# ------------------------------------------------------------
+platforms/
+
+
+# ------------------------------------------------------------
+#  Mesh — generated files only, keep the source
+#  Keep: constant/polyMesh/boundary (hand-written)
+#        system/blockMeshDict, snappyHexMeshDict, etc.
+# ------------------------------------------------------------
+/**/constant/polyMesh/points
+/**/constant/polyMesh/faces
+/**/constant/polyMesh/owner
+/**/constant/polyMesh/neighbour
+/**/constant/polyMesh/cells
+/**/constant/polyMesh/pointZones
+/**/constant/polyMesh/faceZones
+/**/constant/polyMesh/cellZones
+/**/constant/polyMesh/sets/
+/**/constant/polyMesh/
+
+constant/triSurface/
+
+
+# ------------------------------------------------------------
+#  Parallel Decomposition
+# ------------------------------------------------------------
+processor*/
+
+
+# ------------------------------------------------------------
+#  Time Directories  (solver output)
+#  Keeps 0/ (initial conditions) and 0.orig/ (backup of 0/)
+#  Ignores everything that looks like a number: 1, 100, 1.5, 1e-3 …
+# ------------------------------------------------------------
+[1-9]*/
+[1-9][0-9]*/
+0.[0-9]*/
+
+
+# ------------------------------------------------------------
+#  Misc OpenFOAM Runtime Files
+# ------------------------------------------------------------
+postProcessing/
+!tutorial/vortexShred/postProcessing/fwhFoam
+logs/
+log.*
+*.log
+*.foam               # ParaView session launcher
+*.OpenFOAM
+
+# Reconstructed / sample data
+VTK/
+sets/
+surfaces/
+
+# Continuity error tracking (written by solver, not source)
+uniform/
+
+
+# ------------------------------------------------------------
+#  General Cruft
+# ------------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ------------------------------------------------------------
+#  LaTaX
+# ------------------------------------------------------------
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+
+# ------------------------------------------------------------
+#  wmake 
+# ------------------------------------------------------------
+linux64GccDPInt32Opt/
+
+explaination/

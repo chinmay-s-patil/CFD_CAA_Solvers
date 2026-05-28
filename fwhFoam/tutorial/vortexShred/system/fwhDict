@@ -1,0 +1,81 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========				 |												 |
+| \\	  /  F ield		 | OpenFOAM: The Open Source CFD Toolbox		   |
+|  \\	/   O peration	 | Version:  2412								  |
+|   \\  /	A nd		   | Website:  www.openfoam.com					  |
+|	\\/	 M anipulation  |												 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+	version	 2.0;
+	format	  ascii;
+	arch		"LSB;label=32;scalar=64";
+	class	   dictionary;
+	location	"system";
+	object	  fwhDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+FWH
+{
+	rho							1.225;
+	c0							343.0;
+	pRef						2e-5;
+
+	startTime					0.1;
+	endTime	 					10.0;
+	timeStepStride				1;
+	timeInterpolationScheme		linear;
+
+	observers
+	(
+		(0.5 0 0)
+		(0.5 0.5 0)
+		(10 0 0)
+		(20 0 0)
+	);
+
+	writeTimeHistory			no;
+	recomputeTimeHistory		yes;
+
+	sampling
+	{
+		// For printing/info only
+		surfaceName					FWHSurface;
+		surfaceType		 			cylinder;
+		surfaceFormat				vtk;
+
+		// Important Fields
+		faceInterpolationScheme		cellPoint;
+		fields						(p U);
+
+		surfaces
+		{
+			FWHSurface
+			{
+				type	patch;
+				patches (cylinder);
+			}
+		}
+	}
+
+	writeSignal yes;
+	writeSPL	yes;
+
+	fourierTransform
+	{
+		writeFT		yes;
+
+		type		DFT;
+
+		// Entries for FFTW
+		windowType		Hanning;
+		detrend			yes;
+		removeMean		yes;
+		nfft			auto;
+		normalize		yes;
+		normalizeWith	amplitude;
+	}
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
