@@ -1,0 +1,13 @@
+EXE_INC = \
+    -I$(FOAM_SRC)/finiteVolume/lnInclude \
+    -I$(FOAM_SRC)/meshTools/lnInclude \
+    -I$(FOAM_SRC)/surfMesh/lnInclude \
+    -I$(FOAM_SRC)/sampling/lnInclude \
+    -I/usr/include
+
+EXE_LIBS = \
+    -lfiniteVolume \
+    -lmeshTools \
+    -lsurfMesh \
+    -lsampling \
+    -lfftw3

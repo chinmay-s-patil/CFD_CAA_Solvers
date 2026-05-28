@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
 	#include "dictErrors.H"
 	#include "printFWHSettings.H"
 	#include "printSamplingSettings.H"
+	#include "printVolumeFieldSettings.H"
 
 	const label nSurfaces = samplingPtr->size();
 
@@ -93,6 +94,7 @@ int main(int argc, char *argv[])
 
 		#include "readAndSample.H"
 		#include "fwhIntegrate.H"
+		#include "writeVolumeFields.H"
 		#include "writeOutputs.H"
 	}
 

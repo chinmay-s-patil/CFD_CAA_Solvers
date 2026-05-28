@@ -41,6 +41,34 @@ const word interpolationScheme = samplingSubDict.get<word>("faceInterpolationSch
 const word surfaceFormat       = samplingSubDict.get<word>("surfaceFormat");
 const wordList fields(samplingSubDict.lookup("fields"));
 
+// * * * * * * * * * *  Volumetric field output switches  * * * * * * * * * * //
+// Master switches; sub-dict entries are read lazily inside writeVolumeFields.H
+// and writeOutputs.H when the corresponding switch is enabled.
+
+const Switch writeVolumePPrime =
+    fwhSubDict.getOrDefault<Switch>("writeVolumePPrime", false);
+
+const Switch writeVolumeOASPL =
+    fwhSubDict.getOrDefault<Switch>("writeVolumeOASPL", false);
+
+// * * * * * * * * *  OASPL directivity (from observer arc) * * * * * * * * * //
+const Switch writeOASPL =
+    fwhSubDict.getOrDefault<Switch>("writeOASPL", false);
+
+// OASPL geometry params read from OASPL{} sub-dict only when switch is on
+// so that fwhDict without the sub-block still parses cleanly.
+vector oasplCentre(vector::zero);
+vector oasplRefDirection(vector(1, 0, 0));
+word   oasplFileName("oaspl_directivity");
+
+if (writeOASPL)
+{
+    const dictionary& oasplDict = fwhSubDict.subDict("OASPL");
+    oasplCentre       = oasplDict.getOrDefault<vector>("centre",       vector::zero);
+    oasplRefDirection = oasplDict.getOrDefault<vector>("refDirection", vector(1, 0, 0));
+    oasplFileName     = oasplDict.getOrDefault<word>  ("fileName",     "oaspl_directivity");
+}
+
 autoPtr<sampledSurfaces> samplingPtr
 (
 	new sampledSurfaces
