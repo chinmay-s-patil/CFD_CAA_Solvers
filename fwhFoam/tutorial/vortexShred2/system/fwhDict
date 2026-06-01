@@ -1,0 +1,119 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========		 |										 |
+| \\	  /  F ield	| OpenFOAM: The Open Source CFD Toolbox		   |
+|  \\	/   O peration	| Version:  2412					  |
+|   \\  /	A nd		   | Website:  www.openfoam.com				  |
+|	\\/	 M anipulation  |										 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+	version	 2.0;
+	format	  ascii;
+	arch		"LSB;label=32;scalar=64";
+	class	   dictionary;
+	location	"system";
+	object	  fwhDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+FWH
+{
+	rho						1.225;
+	c0						343.0;
+	pRef					2e-5;
+
+	startTime				0.1;
+	endTime  				500.0;
+	timeStepStride			1;
+	timeInterpolationScheme	linear;
+
+	observers
+	(
+		(0.5 0 0)
+		(0.5 0.5 0)
+		(10 0 0)
+		(20 0 0)
+	);
+
+	writeTimeHistory		no;
+	recomputeTimeHistory	yes;
+
+	writeSignal yes;
+	writeSPL	yes;
+
+	// * * * * * OASPL directivity (one value per observer, polar plot) * * //
+	writeOASPL				yes;
+
+	// Required when writeOASPL yes:
+	OASPL
+	{
+	    centre          (0 0 0);        // arc reference point
+	    refDirection    (1 0 0);        // θ = 0° direction
+	    fileName        oaspl_directivity;
+	}
+
+	// * * * *  Volumetric p' field (FWH at every mesh cell, per time step) * //
+	writeVolumePPrime		yes;
+
+	// Required when writeVolumePPrime yes:
+	pPrime
+	{
+	    surfaceName     FWHSurface;     // must match a name in sampling.surfaces{}
+	    fieldName       pPrime;         // written field name
+	    writeInterval   1;              // write every N collected time steps
+	    writeField      yes;            // OF volScalarField (loaded by .foam)
+	    writeVTK        no;            // VTK point cloud .vtk
+	    writeRaw        no;             // flat binary + .info metadata
+	}
+
+	// * *  Volumetric OASPL field (RMS p' over time window -> single snapshot) //
+	writeVolumeOASPL		no;
+
+	// Required when writeVolumeOASPL yes:
+	// volumeOASPL
+	// {
+	//     surfaceName     FWHSurface;
+	//     time            (4.0 8.0);      // (minT maxT) OR single scalar → [startTime, val]
+	//     fieldName       OASPL;
+	//     writeField      yes;
+	//     writeVTK        yes;
+	// }
+
+	fourierTransform
+	{
+		writeFT		yes;
+
+		type		DFT;
+
+		// Entries for FFTW
+		windowType		Hanning;
+		detrend			yes;
+		removeMean		yes;
+		nfft			auto;
+		normalize		yes;
+		normalizeWith	amplitude;
+	}
+
+	sampling
+	{
+		// For printing/info only
+		surfaceName					FWHSurface;
+		surfaceType  				cylinder;
+		surfaceFormat				vtk;
+
+		// Important Fields
+		faceInterpolationScheme		cellPoint;
+		fields						(p U);
+
+		surfaces
+		{
+			FWHSurface
+			{
+				type	patch;
+				patches (cylinder);
+			}
+		}
+	}
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
