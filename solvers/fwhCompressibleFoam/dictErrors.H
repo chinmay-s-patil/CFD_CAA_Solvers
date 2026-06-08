@@ -58,7 +58,6 @@ if (interpolationScheme.empty())
 
 // * * * * * * * * *  Validate volumetric field sub-dicts  * * * * * * * * * //
 
-// Helper: collect all surface names from the sampling block
 wordList sampledSurfaceNames(samplingPtr->size());
 forAll(*samplingPtr, sI)
     sampledSurfaceNames[sI] = (*samplingPtr)[sI].name();
@@ -96,9 +95,6 @@ if (writeVolumeOASPL)
             << exit(FatalError);
     }
 
-    // Validate the 'time' entry: must be scalar or 2-element list.
-    // Use lookup() -> ITstream to avoid the deprecated
-    // lookupEntry(word, bool, bool) overload (removed in OF >= 2306).
     ITstream its = od.lookup("time");
     token tok;
     its >> tok;
@@ -135,4 +131,63 @@ if (writeOASPL && mag(oasplRefDirection) < SMALL)
         << "OASPL.refDirection is a zero vector. "
         << "Specify a non-zero direction for θ = 0°."
         << exit(FatalError);
+}
+
+// * * * * * * * * * * *  Validate zoom sub-dict  * * * * * * * * * * * * * //
+
+if (zoomPostProcess)
+{
+    if (!fwhSubDict.found("zoom"))
+    {
+        FatalErrorInFunction
+            << "zoomPostProcess is enabled but no zoom{} sub-dict found in fwhDict."
+            << exit(FatalError);
+    }
+
+    const dictionary& zd = fwhSubDict.subDict("zoom");
+
+    const wordList validZoomTypes{"CZT", "heterodyne"};
+    const word zType = zd.get<word>("type");
+    if (!validZoomTypes.found(zType))
+    {
+        FatalErrorInFunction
+            << "Unknown zoom.type '" << zType << "'." << nl
+            << "Valid options are: " << validZoomTypes
+            << exit(FatalError);
+    }
+
+    const scalar fStart = zd.get<scalar>("fStart");
+    const scalar fEnd   = zd.get<scalar>("fEnd");
+    if (fStart < 0 || fEnd <= fStart)
+    {
+        FatalErrorInFunction
+            << "zoom.fStart (" << fStart << ") must be >= 0 and "
+            << "zoom.fEnd (" << fEnd << ") must be > fStart."
+            << exit(FatalError);
+    }
+
+    const label nLines = zd.get<label>("nLines");
+    if (nLines < 2)
+    {
+        FatalErrorInFunction
+            << "zoom.nLines (" << nLines << ") must be >= 2."
+            << exit(FatalError);
+    }
+
+    if (zd.found("windowType"))
+    {
+        const wordList validWin
+        {
+            "Hann", "Hanning", "Hamming", "Blackman",
+            "FlatTop", "Bartlett", "Tukey", "rectangular"
+        };
+        const word wType = zd.get<word>("windowType");
+        if (!validWin.found(wType))
+        {
+            FatalErrorInFunction
+                << "Unknown zoom.windowType '" << wType << "'." << nl
+                << "Valid options are: " << validWin
+                << exit(FatalError);
+        }
+    }
 }

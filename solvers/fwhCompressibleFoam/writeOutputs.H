@@ -1,6 +1,6 @@
 // writeOutputs.H
 // Writes acoustic pressure time history (and optionally FT / SPL) for each
-// observer to postProcessing/fwhFoam/<surfaceName>/observer<N>/.
+// observer to postProcessing/fwhCompressibleFoam/<surfaceName>/observer<N>/.
 //
 // Expects in scope (set by fwhFoam.C / fwhIntegrate.H):
 //   surfaceName     word
@@ -14,13 +14,14 @@
 //   writeFT         Switch
 //   writeSPL        Switch
 //   pRef            scalar
+//   zoomPostProcess Switch
 
 const fileName surfOutDir = rootDir / surfaceName;
 mkDir(surfOutDir);
 
 Info << nl
      << "======================================" << nl
-     << "  fwhFoam output: " << surfaceName << nl
+     << "  fwhCompressibleFoam output: " << surfaceName << nl
      << "======================================" << nl
      << "  Observers    : " << nObs   << nl
      << "  Time samples : " << nTimes << nl
@@ -45,7 +46,7 @@ forAll(observers, obsI)
         const fileName sigFile = obsDir / "pTime.dat";
         OFstream os(sigFile);
 
-        os  << "# fwhFoam: acoustic pressure time history" << nl
+        os  << "# fwhCompressibleFoam: acoustic pressure time history" << nl
             << "# Surface  " << surfaceName << nl
             << "# Observer " << obsI
             << "  position " << observers[obsI] << nl
@@ -127,7 +128,7 @@ forAll(observers, obsI)
             const fileName ftFile = obsDir / "ft.dat";
             OFstream os(ftFile);
 
-            os  << "# fwhFoam: FT magnitude spectrum" << nl
+            os  << "# fwhCompressibleFoam: FT magnitude spectrum" << nl
                 << "# Surface  " << surfaceName << nl
                 << "# Observer " << obsI
                 << "  position " << observers[obsI] << nl
@@ -149,7 +150,7 @@ forAll(observers, obsI)
             const fileName splFile = obsDir / "spl.dat";
             OFstream os2(splFile);
 
-            os2 << "# fwhFoam: Sound Pressure Level" << nl
+            os2 << "# fwhCompressibleFoam: Sound Pressure Level" << nl
                 << "# Surface  " << surfaceName << nl
                 << "# Observer " << obsI
                 << "  position " << observers[obsI] << nl
@@ -178,42 +179,31 @@ forAll(observers, obsI)
             << "writeFT requested but fewer than 2 time samples available "
             << "for observer " << obsI << "  skipping FT/SPL." << nl;
     }
+
+    // * * * * * * * * * * * * * * Zoom FFT * * * * * * * * * * * * * * * * //
+
+    {
+        const label N = nTimes;
+        #include "writeZoomOutputs.H"
+    }
 }
 
 // * * * * * * * * * * * * * * OASPL Directivity * * * * * * * * * * * * * * //
-//
-// Computes OASPL = 20 log10(p_rms / pRef) at each observer from the time signal,
-// then writes [theta_deg, OASPL_dB] to oaspl_directivity.dat.
-//
-// theta is the angle of each observer relative to oasplCentre, measured from
-// oasplRefDirection in the plane perpendicular to their cross product (or just
-// the atan2 of the projected components for 2-D cases).
-//
-// Requires in scope: writeOASPL, oasplCentre, oasplRefDirection, oasplFileName,
-//                    observers, pAcoustic, nObs, nTimes, pRef, surfOutDir.
 
 if (writeOASPL && nObs > 0 && nTimes > 0)
 {
     const fileName oasplFile = surfOutDir / oasplFileName + ".dat";
     OFstream oas(oasplFile);
 
-    oas << "# fwhFoam: OASPL directivity" << nl
+    oas << "# fwhCompressibleFoam: OASPL directivity" << nl
         << "# Surface    " << surfaceName << nl
         << "# centre     " << oasplCentre << nl
         << "# refDir     " << oasplRefDirection << nl
         << "# " << nl
         << "# theta [deg]    OASPL [dB]    observer" << nl;
 
-    // Build an orthonormal basis in the plane of the arc:
-    //   e1 = normalised refDirection
-    //   e2 = normalised (e1 × up) or any perpendicular
-    // For a general 3-D arc the user places observers, so we compute the angle
-    // as atan2( r·e2 , r·e1 ) where e2 is orthogonal to e1 in the arc plane.
-    // We derive e2 as the component of the "most misaligned" axis perpendicular to e1.
-
     const vector e1 = oasplRefDirection / (mag(oasplRefDirection) + VSMALL);
 
-    // Pick a helper axis not parallel to e1
     vector helper(0, 0, 1);
     if (mag(e1 ^ helper) < 0.1) helper = vector(0, 1, 0);
     const vector e2 = (helper - (helper & e1)*e1);
@@ -223,11 +213,9 @@ if (writeOASPL && nObs > 0 && nTimes > 0)
     {
         const vector r = observers[obsI] - oasplCentre;
 
-        // Polar angle in the arc plane
         const scalar theta =
             Foam::atan2(r & e2n, r & e1) * 180.0 / constant::mathematical::pi;
 
-        // p_rms from time signal
         const scalarField& sig = pAcoustic[obsI];
         scalar sumSq = 0.0;
         forAll(sig, tI) sumSq += sig[tI] * sig[tI];

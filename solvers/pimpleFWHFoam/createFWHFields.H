@@ -97,4 +97,11 @@ List<vectorField> fwhFaceNormals(fwhNSurfaces);
 List<scalarField> fwhFaceAreas(fwhNSurfaces);
 List<bool>        fwhGeometryGrabbed(fwhNSurfaces, false);
 
+// * * * * * * * * * * * * *  Zoom FFT switch  * * * * * * * * * * * * * * * //
+// The full zoom{} sub-dict is read lazily inside writeZoomOutputs.H so that
+// fwhDict without a zoom{} block still parses cleanly when zoomPostProcess no.
+
+const Switch zoomPostProcess =
+    fwhSubDict.getOrDefault<Switch>("zoomPostProcess", false);
+
 Info << nl << "FW-H: " << fwhNSurfaces << " sampling surface(s) configured." << nl;

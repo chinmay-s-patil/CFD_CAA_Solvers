@@ -178,6 +178,13 @@ forAll(observers, obsI)
             << "writeFT requested but fewer than 2 time samples available "
             << "for observer " << obsI << "  skipping FT/SPL." << nl;
     }
+
+    // * * * * * * * * * * * * * * Zoom FFT * * * * * * * * * * * * * * * * //
+
+    {
+        const label N = nTimes;
+        #include "writeZoomOutputs.H"
+    }
 }
 
 // * * * * * * * * * * * * * * OASPL Directivity * * * * * * * * * * * * * * //
