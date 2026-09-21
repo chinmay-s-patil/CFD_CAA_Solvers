@@ -7,12 +7,6 @@
 > The validation process is still underway, please do contact me if any issues are encountered or
 > any sugesstions you may have.
 <!-- =========================================================== -->
-<!-- =========================================================== -->
-> [!WARNING]
-> **Work in Progress: Not Yet Validated**
->
-> The implementation is functionally complete and builds cleanly against OpenFOAM v2412, but results have **not yet been fully validated** against experimental benchmarks. Use with appropriate engineering discretion. Contact the maintainer for feedback or suggestions.
-<!-- =========================================================== -->
 
 ---
 
